@@ -7,9 +7,16 @@ TCPClient::TCPClient()
 	address = "";
 }
 
+bool TCPClient::setup()
+{
+         return setup(address , port);
+}
+
 bool TCPClient::setup(string address , int port)
 {
-  	if(sock == -1)
+        this->address = address;
+        this->port = port; 
+	if(sock == -1)
 	{
 		sock = socket(AF_INET , SOCK_STREAM , 0);
 		if (sock == -1)
@@ -69,10 +76,11 @@ string TCPClient::receive(int size)
 	memset(&buffer[0], 0, sizeof(buffer));
 
   	string reply;
-	if( recv(sock , buffer , size, 0) < 0)
+	if( recv(sock , buffer , size, 0) <= 0)
   	{
 	    	cout << "receive failed!" << endl;
-		return nullptr;
+                exit();
+		return "";
   	}
 	buffer[size-1]='\0';
   	reply = buffer;
@@ -84,10 +92,11 @@ string TCPClient::read()
   	char buffer[1] = {};
   	string reply;
   	while (buffer[0] != '\n') {
-    		if( recv(sock , buffer , sizeof(buffer) , 0) < 0)
+    		if( recv(sock , buffer , sizeof(buffer) , 0) <= 0)
     		{
       			cout << "receive failed!" << endl;
-			return nullptr;
+                        exit();
+			return "";
     		}
 		reply += buffer[0];
 	}
@@ -97,4 +106,5 @@ string TCPClient::read()
 void TCPClient::exit()
 {
     close( sock );
+    sock = -1;
 }
