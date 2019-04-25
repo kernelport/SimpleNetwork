@@ -30,6 +30,8 @@ void TCPServer::setup(int port)
 	serverAddress.sin_family=AF_INET;
 	serverAddress.sin_addr.s_addr=htonl(INADDR_ANY);
 	serverAddress.sin_port=htons(port);
+        int optValue = 1; // DO NOT make this a "bool" type! I have seen it not working then.
+        setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &optValue, sizeof(optValue));
 	bind(sockfd,(struct sockaddr *)&serverAddress, sizeof(serverAddress));
  	listen(sockfd,5);
 }
