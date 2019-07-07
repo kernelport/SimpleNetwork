@@ -24,7 +24,7 @@ bool TCPClient::setup(string address , int port)
       			cout << "Could not create socket" << endl;
     		}
         }
-  	if(inet_addr(address.c_str()) == -1)
+  	if(inet_addr(address.c_str()) == INADDR_NONE)
   	{
     		struct hostent *he;
     		struct in_addr **addr_list;
