@@ -1,4 +1,5 @@
 #include "TCPClient.h"
+#include <netinet/tcp.h> // ‘TCP_NODELAY’
 
 TCPClient::TCPClient()
 {
@@ -45,6 +46,17 @@ bool TCPClient::setup(string address , int port)
   	{
     		server.sin_addr.s_addr = inet_addr( address.c_str() );
   	}
+
+
+    struct timeval tv;
+    tv.tv_sec = 8; /* Secs Timeout */
+    tv.tv_usec = 0; // Not init'ing this can cause strange errors
+    setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char *) &tv, sizeof (struct timeval));
+    int flag = 1;
+    if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char *) &flag, sizeof (int)) < 0) {
+        std::cout << "TCPServer::handleMessage Could not disable Nagle's algorithm." << std::endl;
+    }
+
   	server.sin_family = AF_INET;
   	server.sin_port = htons( port );
   	if (connect(sock , (struct sockaddr *)&server , sizeof(server)) < 0)
@@ -62,6 +74,7 @@ bool TCPClient::Send(string data)
 		if( send(sock , data.c_str() , strlen( data.c_str() ) , 0) < 0)
 		{
 			cout << "Send failed : " << data << endl;
+                        exit();
 			return false;
 		}
 	}
@@ -79,7 +92,7 @@ string TCPClient::receive(int size)
 	if( recv(sock , buffer , size, 0) <= 0)
   	{
 	    	cout << "receive failed!" << endl;
-                exit();
+		exit();
 		return "";
   	}
 	buffer[size-1]='\0';
@@ -107,4 +120,5 @@ void TCPClient::exit()
 {
     close( sock );
     sock = -1;
+		std::quick_exit( 3 );
 }
